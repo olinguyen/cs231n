@@ -61,18 +61,13 @@ class KNearestNeighbor:
     dists = np.zeros((num_test, num_train))
     for i in xrange(num_test):
       for j in xrange(num_train):
-        '''
-        print X[i], X[i].shape
-        print self.X_train[j], self.X_train[j].shape
-        raw_input()
-        '''
         #####################################################################
         # TODO:                                                             #
         # Compute the l2 distance between the ith test point and the jth    #
         # training point, and store the result in dists[i, j]               #
         #####################################################################
-#dists[i, j] = np.sqrt(np.sum(np.square(X[i] - self.X_train[j])))
-        dists[i, j] = np.sqrt(np.sum(np.square(self.X_train[j] - X[i])))
+        diff = self.X_train[j] - X[i]
+        dists[i, j] = np.sqrt(np.sum(np.square(diff)))
         #####################################################################
         #                       END OF YOUR CODE                            #
         #####################################################################
@@ -94,11 +89,8 @@ class KNearestNeighbor:
       # Compute the l2 distance between the ith test point and all training #
       # points, and store the result in dists[i, :].                        #
       #######################################################################
-      print 'X test', X[i].shape
-      print 'X train', self.X_train.shape
       diff = self.X_train - X[i]
-      print 'Diff', diff.shape
-      dists[i, :] = np.sqrt(np.square(diff))
+      dists[i, :] = np.sqrt(np.sum(np.square(diff), axis=1))
       #######################################################################
       #                         END OF YOUR CODE                            #
       #######################################################################
@@ -122,7 +114,11 @@ class KNearestNeighbor:
     # HINT: Try to formulate the l2 distance using matrix multiplication    #
     #       and two broadcast sums.                                         #
     #########################################################################
-    pass
+    # vectorize
+    ip = X.dot(self.X_train.T) # inner product
+    XT2 = np.sum(self.X_train ** 2, axis=1)
+    X2 = np.sum(X ** 2, axis=1)
+    dists = np.sqrt(-2*ip + XT2 + X2.reshape(-1, 1))
     #########################################################################
     #                         END OF YOUR CODE                              #
     #########################################################################
