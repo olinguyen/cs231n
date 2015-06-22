@@ -70,11 +70,20 @@ def svm_loss_vectorized(W, X, y, reg):
   # Implement a vectorized version of the structured SVM loss, storing the    #
   # result in loss.                                                           #
   #############################################################################
-  pass
+  num_classes = W.shape[0]
+  num_train = X.shape[1]
+  loss = 0.0
+
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
-
+  scores = W.dot(X)
+  correct_class_scores = [scores[y[i], i] for i in range(num_train)]
+  margins = scores - correct_class_scores + 1
+  margins[y, xrange(num_train)] = 0
+  margins = np.maximum(0, margins)
+  loss = np.sum(margins) / num_train
+  loss += 0.5 * reg * np.sum(W * W)
 
   #############################################################################
   # TODO:                                                                     #
@@ -84,8 +93,13 @@ def svm_loss_vectorized(W, X, y, reg):
   # Hint: Instead of computing the gradient from scratch, it may be easier    #
   # to reuse some of the intermediate values that you used to compute the     #
   # loss.                                                                     #
-  #############################################################################
-  pass
+  #########################################/ea vid, count # class !meet margin
+  num_pos = np.sum(margins > 0, axis=0)  # for each vid, count # class > 0
+  coeffs = np.zeros(scores.shape)
+  coeffs[margins > 0] = 1
+  coeffs[y, xrange(num_train)] = -num_pos  # coeffs of Xi for ground truth
+  dW = coeffs.dot(X.T) / num_train + reg * W
+
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
